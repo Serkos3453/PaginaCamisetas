@@ -1,0 +1,397 @@
+{% extends 'tienda/base.html' %}
+{% block title %}Catálogo — FútbolPro{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── HERO ── */
+  /* Estilo para el precio */
+  .card-precio {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--dorado);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Estilo para la paginación */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    padding-bottom: 2rem;
+  }
+  .pagination a, .pagination span.current {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--crema-oscura);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--negro);
+    font-weight: 500;
+  }
+  .pagination a:hover {
+    background: var(--crema);
+    border-color: var(--dorado);
+  }
+  .pagination span.current {
+    background: var(--dorado);
+    color: var(--negro);
+    border-color: var(--dorado);
+  }
+
+  .hero {
+    padding: 4rem 0 3rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem;
+    border-bottom: 1px solid var(--crema-oscura);
+    margin-bottom: 3rem;
+  }
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dorado);
+    margin-bottom: 0.8rem;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -2px;
+    color: var(--negro);
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--dorado);
+  }
+  .hero-sub {
+    font-size: 0.9rem;
+    color: var(--gris);
+    margin-top: 1rem;
+    max-width: 340px;
+    line-height: 1.6;
+  }
+  .hero-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--crema-oscura);
+    line-height: 1;
+    text-align: right;
+  }
+  .hero-count small {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gris-claro);
+    margin-top: 0.2rem;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  /* Buscador */
+  .search-wrap {
+    position: relative;
+    flex: 1; min-width: 220px; max-width: 380px;
+  }
+  .search-wrap svg {
+    position: absolute; left: 1rem; top: 50%;
+    transform: translateY(-50%);
+    color: var(--gris-claro);
+    pointer-events: none;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.8rem;
+    background: var(--blanco);
+    border: 1px solid var(--crema-oscura);
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--negro);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-wrap input:focus {
+    border-color: var(--dorado);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  }
+  .search-wrap input::placeholder { color: var(--gris-claro); }
+
+  /* Filtros categoría */
+  .filtros {
+    display: flex; gap: 0.4rem; flex-wrap: wrap;
+  }
+  .filtro {
+    padding: 0.45rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    border: 1px solid var(--crema-oscura);
+    border-radius: 50px;
+    color: var(--gris);
+    background: var(--blanco);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .filtro:hover { border-color: var(--negro); color: var(--negro); }
+  .filtro.activo {
+    background: var(--negro);
+    border-color: var(--negro);
+    color: var(--blanco);
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--blanco);
+    border: 1px solid var(--crema-oscura);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94),
+                box-shadow 0.3s cubic-bezier(0.25,0.46,0.45,0.94),
+                border-color 0.3s;
+    cursor: pointer;
+    animation: fadeUp 0.5s ease both;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px var(--sombra-hover);
+    border-color: var(--dorado);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Stagger de entrada */
+  .card:nth-child(1)  { animation-delay: 0.05s; }
+  .card:nth-child(2)  { animation-delay: 0.10s; }
+  .card:nth-child(3)  { animation-delay: 0.15s; }
+  .card:nth-child(4)  { animation-delay: 0.20s; }
+  .card:nth-child(5)  { animation-delay: 0.25s; }
+  .card:nth-child(6)  { animation-delay: 0.30s; }
+  .card:nth-child(n+7){ animation-delay: 0.35s; }
+
+  .card-img-wrap {
+    position: relative;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+    background: var(--crema);
+  }
+  .card-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .card:hover .card-img-wrap img { transform: scale(1.06); }
+
+  .card-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem;
+    background: linear-gradient(135deg, var(--crema), var(--crema-oscura));
+  }
+
+  .card-cat-tag {
+    position: absolute; top: 0.75rem; left: 0.75rem;
+    background: var(--negro);
+    color: var(--blanco);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.6rem;
+    border-radius: 2px;
+  }
+
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(17,16,8,0.7) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.35s;
+    display: flex; align-items: flex-end; padding: 1.2rem;
+  }
+  .card:hover .card-overlay { opacity: 1; }
+  .card-overlay a {
+    width: 100%;
+    text-align: center;
+    background: var(--dorado);
+    color: var(--negro);
+    padding: 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+  .card-overlay a:hover { background: var(--dorado-claro); }
+
+  .card-body {
+    padding: 1rem 1.1rem 0.8rem;
+  }
+  .card-nombre {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--negro);
+    margin-bottom: 0.6rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-tallas {
+    display: flex; gap: 0.3rem; flex-wrap: wrap;
+  }
+  .talla-chip {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--crema-oscura);
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    color: var(--gris);
+  }
+
+  /* ── EMPTY ── */
+  .empty {
+    text-align: center;
+    padding: 6rem 2rem;
+    color: var(--gris);
+  }
+  .empty h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--negro);
+    margin-bottom: 0.8rem;
+  }
+
+  @media (max-width: 600px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-count { display: none; }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div>
+    <div class="hero-eyebrow">Colección Oficial · Temporada 25/26 · 26/27</div>
+    <h1>Elige tu<br><em>Camiseta</em></h1>
+    <p class="hero-sub">Selecciona la talla, añade a la cesta y manda tu pedido. Simple y rápido.</p>
+  </div>
+  <div class="hero-count">
+    {{ page_obj.paginator.count }}
+    <small>artículos</small>
+  </div>
+</div>
+
+<div class="toolbar">
+  <form class="search-wrap" method="get">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input type="text" name="q" placeholder="Buscar equipo, liga…" value="{{ busqueda }}"
+           onchange="this.form.submit()">
+  </form>
+
+  <div class="filtros">
+    <a href="{% url 'catalogo' %}{% if busqueda %}?q={{ busqueda }}{% endif %}"
+       class="filtro {% if not categoria_actual %}activo{% endif %}">Todas</a>
+    {% for cat in categorias %}
+    <a href="?categoria={{ cat.slug }}{% if busqueda %}&q={{ busqueda }}{% endif %}"
+       class="filtro {% if categoria_actual.slug == cat.slug %}activo{% endif %}">
+      {{ cat.nombre }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+{% if camisetas %}
+<div class="grid">
+  {% for camiseta in camisetas %}
+  <div class="card" onclick="location.href='{% url 'detalle_camiseta' camiseta.pk %}'">
+    <div class="card-img-wrap">
+      {% if camiseta.imagen_local %}
+        <img src="{{ camiseta.imagen_local.url }}" alt="{{ camiseta.nombre }}" loading="lazy">
+      {% elif camiseta.imagen_url %}
+        <img src="{{ camiseta.imagen_url }}" alt="{{ camiseta.nombre }}" loading="lazy"
+             onerror="this.parentElement.innerHTML='<div class=\'card-placeholder\'>⚽</div>'">
+      {% else %}
+        <div class="card-placeholder">⚽</div>
+      {% endif %}
+
+      {% if camiseta.categoria %}
+      <div class="card-cat-tag">{{ camiseta.categoria.nombre|truncatechars:18 }}</div>
+      {% endif %}
+
+      <div class="card-overlay">
+        <a href="{% url 'detalle_camiseta' camiseta.pk %}" onclick="event.stopPropagation()">
+          Elegir talla →
+        </a>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="card-nombre">{{ camiseta.nombre }}</div>
+      <div class="card-tallas">
+        {% for talla in camiseta.get_tallas %}
+        <span class="talla-chip">{{ talla }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1{% if busqueda %}&q={{ busqueda }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}">‹</a>
+    {% endif %}
+
+    <span class="current">{{ page_obj.number }}</span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}">›</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if busqueda %}&q={{ busqueda }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}">&raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty">
+  <h2>Sin resultados</h2>
+  <p>No hay camisetas con ese filtro.</p>
+  <a href="{% url 'catalogo' %}" class="btn btn-primary" style="margin-top:1.5rem;">Ver todo</a>
+</div>
+{% endif %}
+{% endblock %}

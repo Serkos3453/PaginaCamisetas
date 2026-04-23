@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Fútbol Pro{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crema: #F5F0E8;
+      --crema-oscura: #EDE6D6;
+      --negro: #111008;
+      --gris: #6B6457;
+      --gris-claro: #C4BDB0;
+      --dorado: #C9A84C;
+      --dorado-claro: #E8C97A;
+      --blanco: #FDFAF4;
+      --rojo: #C0392B;
+      --sombra: rgba(17,16,8,0.08);
+      --sombra-hover: rgba(17,16,8,0.18);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--crema);
+      color: var(--negro);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── CURSOR PERSONALIZADO ── */
+    body { cursor: none; }
+    #cursor {
+      width: 10px; height: 10px;
+      background: var(--dorado);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, background 0.3s;
+      mix-blend-mode: multiply;
+    }
+    #cursor.hover {
+      width: 40px; height: 40px;
+      background: var(--dorado-claro);
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--blanco);
+      border-bottom: 1px solid var(--crema-oscura);
+      padding: 0 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 70px;
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--negro);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .nav-logo span {
+      color: var(--dorado);
+      font-style: italic;
+    }
+
+    .nav-right {
+      display: flex; align-items: center; gap: 2rem;
+    }
+
+    .nav-link {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gris);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--negro); }
+
+    .nav-cesta {
+      display: flex; align-items: center; gap: 0.6rem;
+      background: var(--negro);
+      color: var(--blanco) !important;
+      padding: 0.55rem 1.3rem;
+      border-radius: 2px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.25s, transform 0.2s;
+      position: relative;
+    }
+    .nav-cesta:hover { background: var(--dorado); color: var(--negro) !important; transform: translateY(-1px); }
+
+    .cesta-badge {
+      background: var(--dorado);
+      color: var(--negro);
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .nav-cesta:hover .cesta-badge { background: var(--negro); color: var(--dorado); }
+
+    /* ── MENSAJES ── */
+    .messages-wrap {
+      position: fixed; top: 80px; right: 1.5rem;
+      z-index: 500;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .msg {
+      background: var(--blanco);
+      border: 1px solid var(--crema-oscura);
+      border-left: 3px solid var(--dorado);
+      color: var(--negro);
+      padding: 0.85rem 1.3rem;
+      font-size: 0.88rem;
+      border-radius: 2px;
+      box-shadow: 0 4px 20px var(--sombra);
+      animation: slideMsg 0.3s ease;
+      max-width: 340px;
+    }
+    .msg.error { border-left-color: var(--rojo); }
+    @keyframes slideMsg {
+      from { transform: translateX(110%); opacity: 0; }
+      to   { transform: translateX(0);   opacity: 1; }
+    }
+
+    /* ── CONTENIDO ── */
+    main { max-width: 1440px; margin: 0 auto; padding: 2.5rem 3rem; }
+
+    /* ── BOTONES ── */
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.8rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: none;
+      border-radius: 2px;
+      cursor: none;
+      transition: all 0.25s;
+      text-align: center;
+    }
+    .btn-primary {
+      background: var(--negro);
+      color: var(--blanco);
+    }
+    .btn-primary:hover { background: var(--dorado); color: var(--negro); transform: translateY(-2px); }
+    .btn-gold {
+      background: var(--dorado);
+      color: var(--negro);
+    }
+    .btn-gold:hover { background: var(--dorado-claro); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--negro);
+      color: var(--negro);
+    }
+    .btn-outline:hover { background: var(--negro); color: var(--blanco); }
+    .btn-sm { padding: 0.5rem 1.2rem; font-size: 0.78rem; }
+    .btn-danger { background: var(--rojo); color: white; }
+    .btn-danger:hover { background: #922b21; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--crema-oscura);
+      padding: 2rem 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 5rem;
+    }
+    footer p {
+      font-size: 0.82rem;
+      color: var(--gris-claro);
+      letter-spacing: 0.05em;
+    }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: var(--gris-claro);
+    }
+    .footer-logo span { color: var(--dorado); font-style: italic; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 1.2rem; }
+      main { padding: 1.5rem 1.2rem; }
+      footer { padding: 1.5rem 1.2rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<nav>
+  <a href="{% url 'catalogo' %}" class="nav-logo">Fútbol<span>Pro</span></a>
+  <div class="nav-right">
+    <a href="{% url 'catalogo' %}" class="nav-link">Catálogo</a>
+    <a href="{% url 'cesta' %}" class="nav-cesta">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Cesta <span class="cesta-badge">{{ cesta_count }}</span>
+    </a>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="messages-wrap">
+  {% for message in messages %}
+  <div class="msg {% if message.tags == 'error' %}error{% endif %}">{{ message }}</div>
+  {% endfor %}
+</div>
+<script>setTimeout(() => document.querySelectorAll('.msg').forEach(m => m.style.opacity='0'), 3500);</script>
+{% endif %}
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  <div class="footer-logo">Fútbol<span>Pro</span></div>
+  <p>Uso privado · Solo para amigos 🤝</p>
+</footer>
+
+<script>
+  // Cursor personalizado
+  const cur = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px';
+    cur.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .card, label, input, select, textarea').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('hover'));
+  });
+</script>
+</body>
+</html>

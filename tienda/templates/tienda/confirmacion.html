@@ -1,0 +1,158 @@
+{% extends 'tienda/base.html' %}
+{% block title %}Pedido Confirmado — FútbolPro{% endblock %}
+
+{% block extra_css %}
+<style>
+  .confirm-wrap {
+    max-width: 620px;
+    margin: 4rem auto;
+  }
+
+  .confirm-badge {
+    width: 72px; height: 72px;
+    background: var(--dorado);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0) rotate(-20deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+  }
+
+  .confirm-eyebrow {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--dorado); margin-bottom: 0.5rem;
+  }
+
+  .confirm-wrap h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 900; letter-spacing: -1px; line-height: 1;
+    color: var(--negro); margin-bottom: 0.8rem;
+  }
+
+  .confirm-sub {
+    font-size: 0.95rem; color: var(--gris);
+    line-height: 1.7; margin-bottom: 3rem;
+  }
+
+  /* TARJETA PEDIDO */
+  .pedido-card {
+    background: var(--blanco);
+    border: 1px solid var(--crema-oscura);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.5s 0.2s ease both;
+  }
+
+  .pedido-header {
+    background: var(--negro);
+    color: var(--blanco);
+    padding: 1.2rem 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .pedido-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700;
+    color: var(--dorado);
+    letter-spacing: 0.05em;
+  }
+  .pedido-cliente {
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--blanco);
+  }
+
+  .pedido-lineas { padding: 0.5rem 0; }
+
+  .pedido-linea {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid var(--crema-oscura);
+    font-size: 0.88rem;
+  }
+  .pedido-linea:last-child { border-bottom: none; }
+
+  .linea-nombre { color: var(--negro); font-weight: 500; }
+  .linea-talla {
+    display: inline-block; margin-left: 0.5rem;
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--crema-oscura);
+    padding: 0.2rem 0.5rem; border-radius: 2px; color: var(--gris);
+  }
+  .linea-qty {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; font-size: 1rem; color: var(--dorado);
+  }
+
+  .pedido-notas {
+    padding: 1rem 1.5rem;
+    background: var(--crema);
+    font-size: 0.84rem; color: var(--gris);
+    border-top: 1px solid var(--crema-oscura);
+  }
+
+  /* AVISO */
+  .aviso {
+    background: linear-gradient(135deg, #FFF8E7, #FFF0CC);
+    border: 1px solid var(--dorado);
+    border-radius: 4px;
+    padding: 1.2rem 1.5rem;
+    font-size: 0.85rem; color: var(--negro);
+    line-height: 1.6; margin-bottom: 2rem;
+    animation: fadeUp 0.5s 0.3s ease both;
+  }
+  .aviso strong { color: var(--dorado); }
+
+  .acciones {
+    display: flex; gap: 0.8rem; flex-wrap: wrap;
+    animation: fadeUp 0.5s 0.4s ease both;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-wrap">
+  <div class="confirm-badge">✓</div>
+  <div class="confirm-eyebrow">Pedido recibido</div>
+  <h1>¡Todo listo,<br>{{ pedido.nombre_cliente|truncatewords:2 }}!</h1>
+  <p class="confirm-sub">Tu pedido <strong>#{{ pedido.pk }}</strong> ha sido registrado correctamente. Te avisaré en cuanto esté listo para entregarte las camisetas.</p>
+
+  <div class="pedido-card">
+    <div class="pedido-header">
+      <span class="pedido-num">Pedido #{{ pedido.pk }}</span>
+      <span class="pedido-cliente">{{ pedido.nombre_cliente }}</span>
+    </div>
+    <div class="pedido-lineas">
+      {% for linea in lineas %}
+      <div class="pedido-linea">
+        <span class="linea-nombre">
+          {{ linea.camiseta.nombre }}
+          <span class="linea-talla">{{ linea.talla }}</span>
+        </span>
+        <span class="linea-qty">×{{ linea.cantidad }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% if pedido.notas %}
+    <div class="pedido-notas">📝 {{ pedido.notas }}</div>
+    {% endif %}
+  </div>
+
+  <div class="aviso">
+    <strong>¿Qué pasa ahora?</strong> Recibirás confirmación por parte del organizador. 
+    No olvides confirmar el pago cuando te lo indiquen.
+  </div>
+
+  <div class="acciones">
+    <a href="{% url 'catalogo' %}" class="btn btn-primary">Ver más camisetas</a>
+    <a href="{% url 'catalogo' %}" class="btn btn-outline">Nueva cesta</a>
+  </div>
+</div>
+{% endblock %}
