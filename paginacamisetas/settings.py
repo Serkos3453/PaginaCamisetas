@@ -10,20 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv # 1. Importar la librería
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# 2. Cargar el archivo .env
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# 3. Reemplazar la cadena de texto por os.getenv
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6a6mfu95=(ppfupqxnfbyp&7(dq*xq1*4xye!e60f**)zp4jnv'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# También puedes hacerlo con DEBUG para mayor seguridad
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['sergioa.pythonanywhere.com', '127.0.0.1']
 
